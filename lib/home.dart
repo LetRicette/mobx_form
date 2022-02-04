@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 import 'package:mobx_form/controller.dart';
 
 class Home extends StatefulWidget {
@@ -11,6 +12,28 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   Controller controller = Controller();
+  ReactionDisposer? reactionDisposer;
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    // autorun((_) {
+    //   print(controller.formularioValidado);
+    // });
+
+    reactionDisposer = reaction((_) => controller.usuarioLogado, (valor) {
+      //enviaria o usuário para outra tela por aqui
+      print(valor);
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    reactionDisposer!();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,15 +73,25 @@ class _HomeState extends State<Home> {
                 child: Observer(
                   builder: (_) {
                     return ElevatedButton(
-                      onPressed: controller.formularioValidado ? () {} : null,
-                      child: Text(
-                        'Logar',
-                        style: TextStyle(
-                          color: Colors.pink.shade100,
-                          fontWeight: FontWeight.w300,
-                          fontSize: 25,
-                        ),
-                      ),
+                      onPressed: controller.formularioValidado
+                          ? () {
+                              controller.logar();
+                            }
+                          : null,
+                      child: controller.carregando
+                          ? CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation(
+                                Colors.white,
+                              ),
+                            )
+                          : Text(
+                              'Logar',
+                              style: TextStyle(
+                                color: Colors.pink.shade100,
+                                fontWeight: FontWeight.w300,
+                                fontSize: 25,
+                              ),
+                            ),
                     );
                   },
                 ))
